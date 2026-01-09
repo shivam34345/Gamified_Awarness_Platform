@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Database Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/edurights';
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
 const connectDB = async()=>{
     try {

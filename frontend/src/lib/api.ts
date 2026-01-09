@@ -35,7 +35,9 @@ export const gameApi = {
     getLeaderboard: () => api.get('/game/leaderboard'),
     getDailyQuests: () => api.get('/game/daily-quests'),
     getMapData: () => api.get('/game/map'), // Reuse existing map endpoint
-    completeLevel: (levelId: string, stars: number) => api.post('/game/level/complete', { levelId, stars }),
+    completeLevel: (levelId: string, stars: number, solvedPuzzles: string[] = []) => api.post('/game/level/complete', { levelId, stars, solvedPuzzles }),
+    getLevel: (levelId: string) => api.get(`/game/level/${levelId}`),
+    awardChallengeXP: (levelId: string, gameType: string, challengeIndex: number) => api.post('/game/challenge/complete', { levelId, gameType, challengeIndex }),
     submitFeedback: (message: string) => api.post('/game/feedback', { message }),
     completePuzzle: (solvedPuzzles: string[]) => api.post('/game/puzzle/complete', { solvedPuzzles }),
 };

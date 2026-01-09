@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { Flag, Trophy, Lock } from 'lucide-react';
 
 export const MazeRenderer: React.FC = () => {
-    const { maze, playerPos, visitedCells, movePlayer } = useMaze();
+    const { maze, playerPos, visitedCells, movePlayer, solvedPuzzles } = useMaze();
 
     // Keyboard controls
     useEffect(() => {
@@ -33,7 +33,7 @@ export const MazeRenderer: React.FC = () => {
     return (
         // Container - Dark background to act as the "void" or "wall color"
         <div className="flex items-center justify-center w-full h-full bg-slate-950 p-4 lg:p-8 rounded-3xl shadow-2xl overflow-hidden">
-            
+
             {/* The Maze Grid */}
             <div
                 className="grid relative shadow-[0_0_50px_rgba(34,211,238,0.1)] rounded-lg overflow-hidden border-4 border-slate-800"
@@ -58,7 +58,7 @@ export const MazeRenderer: React.FC = () => {
                         // We use very thick borders. 
                         // To make it look like a grid, every cell has a base border, 
                         // but "Walls" are a different, high-contrast color (or transparent to show background).
-                        
+
                         return (
                             <div
                                 key={`${x}-${y}`}
@@ -68,7 +68,7 @@ export const MazeRenderer: React.FC = () => {
                                     "bg-slate-900",
                                     // Visited Trail Color (Slightly lighter path)
                                     isVisited && !isPlayerHere && "bg-slate-800 transition-colors duration-500",
-                                    
+
                                     // WALLS: Thick borders to simulate blocks
                                     // We use a lighter slate for the walls to make them look like solid barriers
                                     // The 'border' logic here is: If wall exists, show border. 
@@ -93,7 +93,7 @@ export const MazeRenderer: React.FC = () => {
                                 )}
 
                                 {/* Puzzle / Lock Marker */}
-                                {cell.puzzleId && !isVisited && (
+                                {cell.puzzleId && !isVisited && !solvedPuzzles.includes(cell.puzzleId) && (
                                     <div className="z-10 animate-bounce">
                                         <Lock className="w-4 h-4 md:w-6 md:h-6 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
                                     </div>
@@ -108,7 +108,7 @@ export const MazeRenderer: React.FC = () => {
                                         <div className="relative w-full h-full bg-linear-to-tr from-cyan-400 to-blue-500 rounded-full shadow-inner border-2 border-white"></div>
                                     </div>
                                 )}
-                                
+
                                 {/* Visited Dot (Breadcrumbs) - purely decorative for empty visited cells */}
                                 {isVisited && !isPlayerHere && !isStart && !isExit && (
                                     <div className="w-1.5 h-1.5 rounded-full bg-slate-700/50" />

@@ -12,6 +12,7 @@ export interface ILevel extends Document {
         timeLimit?: number; // seconds
         minStarsThreshold?: number;
     };
+    games?: any; // Stores the challenge data structure
     x: number;
     y: number;
 }
@@ -28,6 +29,7 @@ const LevelSchema: Schema = new Schema({
         timeLimit: { type: Number },
         minStarsThreshold: { type: Number, default: 1 }
     },
+    games: { type: Schema.Types.Mixed },
     x: { type: Number, required: true },
     y: { type: Number, required: true }
 });

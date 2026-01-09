@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
-import {generateToken} from "../services/generateToken"
+import { generateToken } from "../services/generateToken"
 
 export const register = async (req: Request, res: Response) => {
     try {
@@ -10,7 +10,7 @@ export const register = async (req: Request, res: Response) => {
         // Check if user exists
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) {
-            return res.status(400).json({ status : 'ERROR', message: 'User already exists' });
+            return res.status(400).json({ status: 'ERROR', message: 'User already exists' });
         }
 
         // Hash password
@@ -33,8 +33,8 @@ export const register = async (req: Request, res: Response) => {
         generateToken({ id: newUser._id }, res)
 
         res.status(201).json({
-            status : 'OK',
-            message : 'User registered successfully',
+            status: 'OK',
+            message: 'User registered successfully',
             user: {
                 id: newUser._id,
                 username: newUser.username,
@@ -45,7 +45,7 @@ export const register = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Register Error:', error);
-        res.status(500).json({ status : 'ERROR', message: 'Server error' });
+        res.status(500).json({ status: 'ERROR', message: 'Server error' });
     }
 };
 
@@ -102,20 +102,31 @@ export const login = async (req: Request, res: Response) => {
         // Create Token
         generateToken({ id: user._id }, res);
 
+        let xp = user.progress.reduce((acc: number, curr: any) => acc + curr.xpEarned, 0);
+        xp += user.dailyQuests.reduce((acc: number, curr: any) => acc + curr.xpReward, 0);
+
         res.json({
-            status : 'OK',
-            message : 'Login successful',
+            status: 'OK',
+            message: 'Login successful',
             user: {
                 id: user._id,
                 username: user.username,
                 email: user.email,
                 avatarId: user.avatarId,
-                totalStars: user.totalStars
+                totalStars: user.totalStars,
+                currentRegion: user.currentRegion, // Ensure these fields exist in login response too
+                badges: user.badges,
+                dailyQuests: user.dailyQuests,
+                xp: xp,
+                level: user.level,
+                progress: user.progress,
+                streak: user.streak,
+                accuracy: user.accuracy
             },
         });
     } catch (error) {
         console.error('Login Error:', error);
-        res.status(500).json({ status : 'ERROR', message: 'Server error' });
+        res.status(500).json({ status: 'ERROR', message: 'Server error' });
     }
 };
 export const verifyToken = async (req: Request, res: Response) => {
@@ -124,12 +135,13 @@ export const verifyToken = async (req: Request, res: Response) => {
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ status : 'ERROR', message: 'User not found' });
+            return res.status(404).json({ status: 'ERROR', message: 'User not found' });
         }
 
+
         res.json({
-            status : 'OK',
-            message : 'User found',
+            status: 'OK',
+            message: 'User found',
             user: {
                 id: user._id,
                 username: user.username,
@@ -146,7 +158,7 @@ export const verifyToken = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Verify Token Error:', error);
-        res.status(500).json({ status : 'ERROR', message: 'Server error' });
+        res.status(500).json({ status: 'ERROR', message: 'Server error' });
     }
 };
 
@@ -156,7 +168,7 @@ export const getMe = async (req: Request, res: Response) => {
         const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ status : 'ERROR', message: 'User not found' });
+            return res.status(404).json({ status: 'ERROR', message: 'User not found' });
         }
 
         res.json({
@@ -178,6 +190,6 @@ export const getMe = async (req: Request, res: Response) => {
         });
     } catch (error) {
         console.error('Get Me Error:', error);
-        res.status(500).json({ status : 'ERROR', message: 'Server error' });
+        res.status(500).json({ status: 'ERROR', message: 'Server error' });
     }
 };

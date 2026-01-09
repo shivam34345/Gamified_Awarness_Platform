@@ -1,17 +1,42 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { MazeProvider } from '../context/MazeContext';
 import { MazeGame } from '../components/game/MazeGame';
 import { X } from 'lucide-react';
 
+import { useState } from 'react';
+import { gameApi } from '../lib/api';
+import { ChallengeGame } from '../components/game/challenges/ChallengeGame';
+
 const MazePage = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const levelId = searchParams.get('levelId') || undefined;
+    const [levelData, setLevelData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (levelId) {
+            gameApi.getLevel(levelId)
+                .then(res => {
+                    setLevelData(res.data);
+                })
+                .catch(err => {
+                    console.error("Failed to fetch level", err);
+                })
+                .finally(() => setLoading(false));
+        } else {
+            setLoading(false);
+        }
+    }, [levelId]);
 
     const handleClose = () => {
         navigate('/play');
     };
+
+    if (loading) return <div className="text-white text-center mt-20">Loading...</div>;
+
+    const isChallengeLevel = levelData && levelData.games && Object.keys(levelData.games).length > 0;
 
     return (
         <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">

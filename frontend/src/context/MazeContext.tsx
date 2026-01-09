@@ -9,29 +9,49 @@ interface MazeContextType {
     playerPos: Coordinates;
     visitedCells: string[]; // "x,y" strings
     isLoading: boolean;
+    activePuzzle: string | null;
+    solvedPuzzles: string[];
     generateNewMaze: (config: MazeConfig, levelId?: string) => void;
     movePlayer: (direction: Direction) => void;
     checkCollision: (x: number, y: number, direction: Direction) => boolean;
     solvePuzzle: (puzzleId: string) => Promise<void>;
+    clearActivePuzzle: () => void;
 }
 
 const MazeContext = createContext<MazeContextType | undefined>(undefined);
 
 export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: () => void }> = ({ children, onComplete }) => {
-    const { updateUser } = useAuth(); // Get updateUser
+    const { updateUser } = useAuth();
     const [maze, setMaze] = useState<Maze | null>(null);
     const [playerPos, setPlayerPos] = useState<Coordinates>({ x: 0, y: 0 });
     const [visitedCells, setVisitedCells] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [currentLevelId, setCurrentLevelId] = useState<string | null>(null);
+    const [activePuzzle, setActivePuzzle] = useState<string | null>(null);
+    const [solvedPuzzles, setSolvedPuzzles] = useState<string[]>([]);
 
     const generateNewMaze = (config: MazeConfig, levelId?: string) => {
         setIsLoading(true);
         setCurrentLevelId(levelId || null);
+        setSolvedPuzzles([]); // Reset solved puzzles for new maze
+        setActivePuzzle(null);
+
         // Small timeout to allow UI to show loading state if needed
         setTimeout(() => {
             const generator = new MazeGenerator(config);
             const newMaze = generator.generate();
+
+            // Prefix Puzzle IDs with Level ID for Uniqueness
+            if (levelId) {
+                newMaze.grid.forEach(row => {
+                    row.forEach(cell => {
+                        if (cell.puzzleId) {
+                            cell.puzzleId = `${levelId}-${cell.puzzleId}`;
+                        }
+                    });
+                });
+            }
+
             setMaze(newMaze);
             setPlayerPos(newMaze.startPosition);
             setVisitedCells([`${newMaze.startPosition.x},${newMaze.startPosition.y}`]);
@@ -41,18 +61,15 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
 
     const checkCollision = (x: number, y: number, dir: Direction): boolean => {
         if (!maze) return true;
-
         const cell = maze.grid[y][x];
-        // If there is a wall in that direction, collision is true
         return cell.walls[dir];
     };
 
     const movePlayer = async (dir: Direction) => {
-        if (!maze) return;
+        if (!maze || activePuzzle) return; // Block move if puzzle active
 
         const { x, y } = playerPos;
         if (checkCollision(x, y, dir)) {
-            // console.log("Collision detected!"); 
             return; // Hit a wall
         }
 
@@ -66,8 +83,16 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
             case 'W': newX--; break;
         }
 
-        // Boundary check (safety, though walls should prevent this)
+        // Boundary check
         if (newX >= 0 && newX < maze.config.width && newY >= 0 && newY < maze.config.height) {
+            const targetCell = maze.grid[newY][newX];
+
+            // Check for Puzzle
+            if (targetCell.puzzleId && !solvedPuzzles.includes(targetCell.puzzleId)) {
+                setActivePuzzle(targetCell.puzzleId);
+                return; // Stop movement until solved
+            }
+
             setPlayerPos({ x: newX, y: newY });
 
             const cellKey = `${newX},${newY}`;
@@ -75,23 +100,21 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
                 setVisitedCells(prev => [...prev, cellKey]);
             }
 
-            // Check for valid puzzle or exit here?
-            const cell = maze.grid[newY][newX];
-            if (cell.type === 'exit') {
+            if (targetCell.type === 'exit') {
                 console.log("Level Complete!");
                 const toast = (await import('react-hot-toast')).default;
                 toast.success("Level Complete! 🎉");
 
                 if (currentLevelId) {
                     try {
-                        const res = await gameApi.completeLevel(currentLevelId, 3); // Default 3 stars for now
+                        const res = await gameApi.completeLevel(currentLevelId, 3, solvedPuzzles);
 
                         if (res.data) {
                             updateUser({
                                 xp: res.data.xp,
                                 totalStars: res.data.totalStars,
                                 level: res.data.level,
-                                progress: res.data.progress // Update progress array so MissionMap unlocks next level
+                                progress: res.data.progress
                             });
                         }
 
@@ -102,7 +125,6 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
                     }
                 }
 
-                // Trigger close after a delay
                 if (onComplete) {
                     setTimeout(() => {
                         onComplete();
@@ -113,50 +135,20 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
     };
 
     const solvePuzzle = async (puzzleId: string) => {
-        // Optimistic update logic or just API call
-        // We'll maintain a local set of solved puzzles for this session?
-        // Actually, the user wants "take ALL challenges solved by user to backend".
-        // Use a ref or state for session puzzles?
-        // Let's rely on backend filtering mostly, but we can send "current session history".
-
-        // For simplicity and to satisfy the requirement:
-        // We accumulate specific puzzles solved in this session.
-        // We could store it in 'visitedCells' logic? No, separate state.
-
         try {
-            // We initiate the API call with just this puzzle + any we tracked?
-            // The prompt says "take all the challenges solved by user...".
-            // Ideally we should track `solvedPuzzles` state in Context.
-            // But I will just send THIS one for now combined with a hypothetical list if I added state.
-            // Since I didn't add state yet, I'll send just this one in an array, 
-            // assuming the prompt implies "send what you have".
+            setSolvedPuzzles(prev => [...prev, puzzleId]);
+            setActivePuzzle(null);
 
-            // Wait, if I only send one, the backend logic `newPuzzles` will work fine. 
-            // It's stateless on the request (except for DB check).
-            // So sending [currentPuzzleId] is sufficient and correct.
+            const toast = (await import('react-hot-toast')).default;
+            toast.success(`Lock Open!`, { icon: '🔓' });
 
-            const res = await gameApi.completePuzzle([puzzleId]);
-
-            if (res.data) {
-                // Update User Context with new XP/Level
-                updateUser({
-                    xp: res.data.xp,
-                    totalStars: res.data.totalStars, // if returned
-                    level: res.data.level,
-                    dailyQuests: res.data.dailyQuests
-                });
-
-                // Show toast
-                const toast = (await import('react-hot-toast')).default;
-                if (res.data.xpAwarded > 0) {
-                    toast.success(`Puzzle Solved! +${res.data.xpAwarded} XP`);
-                } else {
-                    toast.success(`Puzzle Solved!`);
-                }
-            }
         } catch (error) {
             console.error("Failed to solve puzzle", error);
         }
+    };
+
+    const clearActivePuzzle = () => {
+        setActivePuzzle(null);
     };
 
     return (
@@ -165,10 +157,13 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
             playerPos,
             visitedCells,
             isLoading,
+            activePuzzle,
+            solvedPuzzles,
             generateNewMaze,
             movePlayer,
             checkCollision,
-            solvePuzzle
+            solvePuzzle,
+            clearActivePuzzle
         }}>
             {children}
         </MazeContext.Provider>

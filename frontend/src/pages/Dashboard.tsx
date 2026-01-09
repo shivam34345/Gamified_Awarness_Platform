@@ -70,8 +70,6 @@ const Dashboard = () => {
         }
     }, [user]);
 
-
-
     // Derived Stats from User Data
     const currentXP = user?.xp || 0;
     const currentLevel = Math.floor(currentXP / 100) + 1;

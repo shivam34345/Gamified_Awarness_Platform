@@ -41,6 +41,9 @@ importers:
       node-cron:
         specifier: ^4.2.1
         version: 4.2.1
+      tsc-node:
+        specifier: ^0.0.3
+        version: 0.0.3
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
@@ -876,6 +879,9 @@ packages:
       '@swc/wasm':
         optional: true
 
+  tsc-node@0.0.3:
+    resolution: {integrity: sha512-cCfkuHFGRUS5afZhabC9a8KEY1KD2X85KmXUu20HUUFXzJMHGfUvc6t++sy9p02dAscZsNfxKcUVbFLhTltTcA==}
+
   tsconfig-paths@4.2.0:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
@@ -888,6 +894,11 @@ packages:
   type-is@2.0.1:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
+
+  typescript@2.9.2:
+    resolution: {integrity: sha512-Gr4p6nFNaoufRIY4NMdpQRNmgxVIGMs4Fcu/ujdYk3nAZqk7supzBE9idmvfZIlH/Cuj//dvi+019qEue9lV0w==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
@@ -1694,6 +1705,10 @@ snapshots:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
+  tsc-node@0.0.3:
+    dependencies:
+      typescript: 2.9.2
+
   tsconfig-paths@4.2.0:
     dependencies:
       json5: 2.2.3
@@ -1712,6 +1727,8 @@ snapshots:
       content-type: 1.0.5
       media-typer: 1.1.0
       mime-types: 3.0.2
+
+  typescript@2.9.2: {}
 
   typescript@5.9.3: {}
 
