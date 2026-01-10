@@ -7,8 +7,6 @@ import SEED_DATA from './data.js';
 
 dotenv.config();
 
-
-
 const seed = async () => {
     try {
         await connectDB();

@@ -31,12 +31,10 @@ const MazePage = () => {
     }, [levelId]);
 
     const handleClose = () => {
-        navigate('/play');
+        navigate('/dashboard/play?return=/dashboard');
     };
 
     if (loading) return <div className="text-white text-center mt-20">Loading...</div>;
-
-    const isChallengeLevel = levelData && levelData.games && Object.keys(levelData.games).length > 0;
 
     return (
         <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">

@@ -3,6 +3,7 @@ import type { Maze, MazeConfig, Coordinates, Direction } from '../types/maze';
 import { MazeGenerator } from '../lib/maze/generator';
 import { useAuth } from './AuthContext'; // Import useAuth
 import { gameApi } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 interface MazeContextType {
     maze: Maze | null;
@@ -101,24 +102,18 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
             }
 
             if (targetCell.type === 'exit') {
-                console.log("Level Complete!");
-                const toast = (await import('react-hot-toast')).default;
-                toast.success("Level Complete! 🎉");
-
                 if (currentLevelId) {
                     try {
-                        const res = await gameApi.completeLevel(currentLevelId, 3, solvedPuzzles);
+                        const res = await gameApi.completeLevel(currentLevelId, solvedPuzzles);
 
                         if (res.data) {
                             updateUser({
                                 xp: res.data.xp,
-                                totalStars: res.data.totalStars,
-                                level: res.data.level,
                                 progress: res.data.progress
                             });
                         }
 
-                        toast.success(`Progress Saved! ${res.data.xpAwarded > 0 ? `+${res.data.xpAwarded} XP` : ''}`);
+                        toast.success(res.data.message);
                     } catch (e) {
                         console.error("Failed to complete level", e);
                         toast.error("Failed to save progress.");
@@ -139,7 +134,6 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
             setSolvedPuzzles(prev => [...prev, puzzleId]);
             setActivePuzzle(null);
 
-            const toast = (await import('react-hot-toast')).default;
             toast.success(`Lock Open!`, { icon: '🔓' });
 
         } catch (error) {

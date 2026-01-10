@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, mongo } from 'mongoose';
 
 export interface ILevelProgress {
     levelId: mongoose.Types.ObjectId;
@@ -32,7 +32,12 @@ export interface IUser extends Document {
         isClaimed: boolean;
         assignedAt: Date;
     }[];
-    solvedChallenges: mongoose.Types.ObjectId[];
+    currency: number;
+    reputation: number;
+    social: {
+        dailyKudosCount: number;
+        lastKudosDate: Date;
+    };
     createdAt: Date;
 }
 
@@ -60,13 +65,18 @@ const UserSchema: Schema = new Schema({
         lastLogin: { type: Date, default: Date.now }
     },
     dailyQuests: [{
-        questId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Quest' },
+        questId: { type: mongoose.Schema.Types.ObjectId, ref:'Users' ,required: true },
         xpReward: { type: Number, default: 0 },
         progress: { type: Number, default: 0 },
         isClaimed: { type: Boolean, default: false },
         assignedAt: { type: Date, default: Date.now }
     }],
-    solvedChallenges: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Challenge' }]
+    currency: { type: Number, default: 0 },
+    reputation: { type: Number, default: 0 },
+    social: {
+        dailyKudosCount: { type: Number, default: 0 },
+        lastKudosDate: { type: Date, default: Date.now }
+    }
 }, {
     timestamps: true
 });

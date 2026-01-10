@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Target, Flame, Gift, Puzzle, MessageSquare } from "lucide-react";
 import { GameCard } from "@/components/ui/GameCard";
 import { GameBadge } from "@/components/ui/GameBadge";
+import { useState, useEffect } from "react";
+import { gameApi } from "@/lib/api";
 
 interface Quest {
     questId: string;
@@ -12,11 +14,25 @@ interface Quest {
     icon?: string;
 }
 
-interface DailyQuestsListProps {
-    quests: Quest[];
-}
+export const DailyQuestsList = () => {
+    const [quests, setQuests] = useState<Quest[]>([]);
+    const [loading, setLoading] = useState(true);
 
-export const DailyQuestsList = ({ quests }: DailyQuestsListProps) => {
+    useEffect(() => {
+        const fetchQuests = async () => {
+            try {
+                const res = await gameApi.getDailyQuests();
+                setQuests(res.data);
+            } catch (error) {
+                console.error("Failed to fetch daily quests", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchQuests();
+    }, []);
+
     // Helper to get icon component based on string
     const getIcon = (type?: string) => {
         if (type === 'LEVELS_COMPLETED') return Target;
@@ -25,6 +41,22 @@ export const DailyQuestsList = ({ quests }: DailyQuestsListProps) => {
         if (type === 'FEEDBACK_GIVEN') return MessageSquare;
         return Gift;
     };
+
+    if (loading) {
+        return (
+            <GameCard glow="none">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-display font-bold text-dark flex items-center gap-2">
+                        <Target size={20} className="text-primary" />
+                        Daily Quests
+                    </h3>
+                </div>
+                <div className="text-center py-4 text-gray-400 font-nunito">
+                    Loading...
+                </div>
+            </GameCard>
+        );
+    }
 
     return (
         <GameCard glow="none">

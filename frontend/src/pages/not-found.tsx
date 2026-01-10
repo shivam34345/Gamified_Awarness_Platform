@@ -1,11 +1,14 @@
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 const NotFound = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const returnPath = searchParams.get('return') || '/';
+
     return (
         <div className="flex flex-col items-left justify-center h-screen p-5">
-            <Link to="/" className="flex items-center gap-2 text-lg">
+            <Link to={returnPath} className="flex items-center gap-2 text-lg">
                 <ArrowLeft />
                 <span>Back To Home</span>
             </Link>

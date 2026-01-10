@@ -5,20 +5,6 @@ const api = axios.create({
     withCredentials: true
 });
 
-// Add a request interceptor to add the token to headers
-// api.interceptors.request.use(
-//     (config) => {
-//         const token = localStorage.getItem('token'); // Changed from 'edu_user' object to simple token storage or extract from it
-//         if (token) {
-//             config.headers.Authorization = `Bearer ${token}`;
-//         }
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     }
-// );
-
 // Add a response interceptor for global error handling
 api.interceptors.response.use(
     (response) => response,
@@ -30,16 +16,39 @@ api.interceptors.response.use(
     }
 );
 
+export const authApi = {
+    login: (email: string, password: string) => api.post('/auth/login', { email, password }),
+    register: (data: any) => api.post('/auth/register', data),
+    verifyToken: () => api.get('/auth/verify'),
+    logout: () => api.get('/auth/logout'),
+};
+
 // Helper methods
 export const gameApi = {
     getLeaderboard: () => api.get('/game/leaderboard'),
     getDailyQuests: () => api.get('/game/daily-quests'),
     getMapData: () => api.get('/game/map'), // Reuse existing map endpoint
-    completeLevel: (levelId: string, stars: number, solvedPuzzles: string[] = []) => api.post('/game/level/complete', { levelId, stars, solvedPuzzles }),
+    completeLevel: (levelId: string, solvedPuzzles: string[] = []) => api.post('/game/level/complete', { levelId, solvedPuzzles }),
     getLevel: (levelId: string) => api.get(`/game/level/${levelId}`),
-    awardChallengeXP: (levelId: string, gameType: string, challengeIndex: number) => api.post('/game/challenge/complete', { levelId, gameType, challengeIndex }),
     submitFeedback: (message: string) => api.post('/game/feedback', { message }),
     completePuzzle: (solvedPuzzles: string[]) => api.post('/game/puzzle/complete', { solvedPuzzles }),
+};
+
+export const socialApi = {
+    sendKudos: (data: { recipientId: string; assetType: string; message?: string }) =>
+        api.post('/social/kudos', data),
+    sendGift: (data: { recipientId: string; assetType: string; amount: number; message?: string }) =>
+        api.post('/social/gift', data),
+    getHistory: () => api.get('/social/history'),
+    searchUsers: () => api.get(`/social/search`),
+};
+
+export const duelApi = {
+    createDuel: (data: { opponentId: string; metric: string; wager: number; durationHours?: number }) =>
+        api.post('/duels/create', data),
+    respondToDuel: (data: { duelId: string; response: 'ACCEPT' | 'DECLINE' }) =>
+        api.post('/duels/respond', data),
+    getDuels: () => api.get('/duels'),
 };
 
 export default api;

@@ -57,7 +57,7 @@ export const initDailyQuestsJob = () => {
                     questId: feedbackQuestId,
                     title: 'Give Feedback',
                     description: 'Share your thoughts with us.',
-                    xpReward: 7,
+                    xpReward: 5,
                     type: 'DAILY',
                     criteria: {
                         type: 'FEEDBACK_GIVEN',
@@ -67,9 +67,9 @@ export const initDailyQuestsJob = () => {
             }
 
             const newDailyQuests = [
-                { questId: puzzleQuest.questId, progress: 0, isClaimed: false, assignedAt: new Date() },
-                { questId: levelQuest.questId, progress: 0, isClaimed: false, assignedAt: new Date() },
-                { questId: feedbackQuest.questId, progress: 0, isClaimed: false, assignedAt: new Date() }
+                { questId: puzzleQuest._id, progress: 0, isClaimed: false, assignedAt: new Date() },
+                { questId: levelQuest._id, progress: 0, isClaimed: false, assignedAt: new Date() },
+                { questId: feedbackQuest._id, progress: 0, isClaimed: false, assignedAt: new Date() }
             ];
 
             // 2. Assign to ALL Users
@@ -77,7 +77,7 @@ export const initDailyQuestsJob = () => {
                 $set: { dailyQuests: newDailyQuests }
             });
 
-            console.log(`Assigned daily quests to all users. Puzzle Count: ${puzzleCount}, Total XP: ${puzzleXP + 5 + 7}`);
+            console.log(`Assigned daily quests to all users. Puzzle Count: ${puzzleCount}, Total XP: ${puzzleXP + 5 + 5}`);
 
         } catch (error) {
             console.error('Error in daily quests cron job:', error);

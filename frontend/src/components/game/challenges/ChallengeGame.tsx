@@ -48,30 +48,9 @@ export const ChallengeGame = ({ level, onClose, mode = 'sequence' }: ChallengeGa
     }, [level, mode]);
 
     const handleChallengeComplete = async (xp: number) => {
-        // Award XP via API
         try {
-            // In single mode, the parent component handles the "Solve Puzzle" API call usually?
-            // Or does ChallengeGame handle it?
-            // The parent MazeContext.solvePuzzle calls the API. 
-            // But ChallengeGame is designed to be standalone-ish.
-            // If mode is single, we should probably just return success to parent?
-            // BUT: onComplete prop is just for UI closing in current code. 
-            // The XP award happens here: await gameApi.awardChallengeXP
-
-            // Let's keep awarding XP for the specific mini-game here.
-            // But for the Maze Lock, the context also calls `completePuzzle` which awards XP.
-            // We might be double dipping if we are not careful.
-            // However, `awardChallengeXP` seems unimplemented/placeholder in my mind? 
-            // In `game.controller.ts` I should check.
-            // Assuming for now we award XP here for the *game* and MazeContext awards XP for the *puzzle*.
-            // That's fine.
-
-            // Removed immediate API call to prevent double counting and API spam.
-            // XP is now batched and awarded at level completion via MazeContext -> key puzzle IDs.
 
             setScore(prev => prev + xp);
-            // toast.success(`+${xp} XP!`, { icon: '⭐' }); // Context might handle this or we wait for level end? 
-            // Let's keep a small UI feedback but clarify it's "Puzzle Solved"
             toast.success("Challenge Solved!", { icon: '✅' });
 
             // Next Challenge Logic
@@ -79,15 +58,12 @@ export const ChallengeGame = ({ level, onClose, mode = 'sequence' }: ChallengeGa
                 setTimeout(() => setCurrentIndex(prev => prev + 1), 1000);
             } else {
                 setGameOver(true);
-
                 // If single mode, we might want to just close automaticall or show small victory?
                 if (mode === 'single') {
                     // In maze mode, we don't complete the whole level here.
                     setTimeout(onClose, 1500);
                     return;
                 }
-
-                await gameApi.completeLevel(level.levelId, 3);
             }
         } catch (error) {
             console.error("XP Error", error);

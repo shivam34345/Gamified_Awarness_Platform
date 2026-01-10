@@ -12,8 +12,6 @@ interface TapSelectGameProps {
 
 export const TapSelectGame = ({ data, onComplete }: TapSelectGameProps) => {
     const correctAnswers = Array.isArray(data.a) ? data.a : [data.a];
-    // Need options again. The seed data for "tap": [ { "q": "...", "a": "..." } ]
-    // Again, need distractors.
 
     const distractors = ["Stranger", "Unknown Link", "Candy", "Secret", "Alone"]
         .filter(d => !correctAnswers.includes(d))

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 
+
 import { useAuth } from "@/context/AuthContext";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { HeroSection } from "@/components/dashboard/HeroSection";
@@ -8,7 +9,7 @@ import { DailyQuestsList } from "@/components/dashboard/DailyQuestsList";
 import { RecentBadgesList } from "@/components/dashboard/RecentBadgesList";
 import { LeaderboardPreview } from "@/components/dashboard/LeaderboardPreview";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MessageSquare, Send, X } from "lucide-react";
 import { gameApi } from "@/lib/api";
 import { GameButton } from "@/components/ui/GameButton";
@@ -16,65 +17,11 @@ import toast from "react-hot-toast";
 
 const Dashboard = () => {
     const { user, updateUser } = useAuth();
-    const [leaderboard, setLeaderboard] = useState<any[]>([]);
-    const [dailyQuests, setDailyQuests] = useState<any[]>([]);
-    const [topicProgress, setTopicProgress] = useState<any[]>([]);
-
-    useEffect(() => {
-        const loadDashboardData = async () => {
-            try {
-                const [leaderboardRes, questsRes, mapRes] = await Promise.all([
-                    gameApi.getLeaderboard(),
-                    gameApi.getDailyQuests(),
-                    gameApi.getMapData()
-                ]);
-                setLeaderboard(leaderboardRes.data);
-                setDailyQuests(questsRes.data);
-
-                // Calculate Topic Progress
-                if (user && user.progress && mapRes.data) {
-                    const mapData = mapRes.data; // Assuming mapData is array of regions
-                    const calculatedProgress = mapData.map((region: any) => {
-                        const totalLevels = region.levels.length;
-                        const completedInRegion = user.progress.filter((p: any) =>
-                            p.status === 'completed' &&
-                            region.levels.some((l: any) => l.levelId === p.levelId)
-                        ).length;
-
-                        // Calculate stars
-                        const starsInRegion = user.progress
-                            .filter((p: any) => region.levels.some((l: any) => l.levelId === p.levelId))
-                            .reduce((acc: number, curr: any) => acc + (curr.stars || 0), 0);
-
-                        return {
-                            id: region.regionId,
-                            title: region.title,
-                            // icon: region.icon,
-                            progress: Math.round((completedInRegion / (totalLevels || 1)) * 100),
-                            totalLevels,
-                            completedLevels: completedInRegion,
-                            stars: starsInRegion,
-                            color: region.themeColor || 'blue' // Fallback
-                        };
-                    });
-                    setTopicProgress(calculatedProgress);
-                }
-
-            } catch (error) {
-                console.error("Failed to load dashboard data", error);
-            }
-        };
-
-        if (user) {
-            loadDashboardData();
-        }
-    }, [user]);
-
     // Derived Stats from User Data
     const currentXP = user?.xp || 0;
     const currentLevel = Math.floor(currentXP / 100) + 1;
     const nextLevelXP = currentLevel * 60;
-    const streakCount = user?.streak?.count || 1;
+    const streakCount = user?.streak?.count || 0;
     const accuracy = user?.accuracy || 0;
     const badgesCount = user?.badges?.length || 0;
 
@@ -91,18 +38,13 @@ const Dashboard = () => {
             setFeedbackText("");
             setShowFeedback(false);
 
-            // Update User State (XP / Level)
             updateUser({
                 xp: res.data.xp,
                 level: res.data.level
             });
 
-            // Refresh quests? Ideally yes, or better, response returns new quests
-            const questsRes = await gameApi.getDailyQuests();
-            setDailyQuests(questsRes.data);
         } catch (error) {
             console.error("Feedback error", error);
-            // toast.error("Failed to send feedback"); // handled by api interceptor
         }
     };
 
@@ -152,6 +94,20 @@ const Dashboard = () => {
                             value={feedbackText}
                             onChange={(e) => setFeedbackText(e.target.value)}
                         />
+                        <div className="hidden md:flex items-center space-x-6 mr-6">
+                            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-full">
+                                <span className="text-yellow-500 text-lg">🪙</span>
+                                <span className="font-bold text-slate-700 dark:text-slate-200">{user?.xp || 0}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-full">
+                                <span className="text-amber-500 text-lg">⭐</span>
+                                <span className="font-bold text-slate-700 dark:text-slate-200">{user?.streak.count || 0} Rep</span>
+                            </div>
+                            <div className="flex flex-col items-end">
+                                <div className="text-sm font-medium text-slate-500 dark:text-slate-400">Current XP</div>
+                                <div className="text-xl font-bold text-indigo-600 dark:text-indigo-400">{currentXP} XP</div>
+                            </div>
+                        </div>
 
                         <div className="mt-4 flex justify-end">
                             <GameButton variant="primary" onClick={handleFeedbackSubmit} disabled={!feedbackText.trim()}>
@@ -182,25 +138,21 @@ const Dashboard = () => {
                         badgesCount={badgesCount}
                         streakCount={streakCount}
                     />
-
-                    {/* We need to pass real progress data here later, for now keeping it as is or passing user progress if component ready */}
-                    <TopicProgressList topics={topicProgress} />
+                    <TopicProgressList />
                 </motion.div>
 
-                {/* Right Column - Quests & Badges */}
                 <motion.div
                     className="space-y-6"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <DailyQuestsList quests={dailyQuests} />
+                    <DailyQuestsList />
                     <RecentBadgesList badges={user?.badges} />
-                    <LeaderboardPreview players={leaderboard} />
+                    <LeaderboardPreview />
                 </motion.div>
             </div>
         </div>
-        // </div >
     );
 };
 

@@ -61,7 +61,8 @@ export const MissionMap = () => {
                 const mergedRegions = mapData.map((region: any) => {
                     const levels = region.levels.map((level: any) => {
                         // Ensure stringent string matching
-                        const prog = userProgress.find((p: any) => String(p.levelId) === String(level.levelId));
+                        // User progress stores levelId as ObjectId, Map Data level has _id as ObjectId
+                        const prog = userProgress.find((p: any) => String(p.levelId) === String(level._id));
                         let status = prog ? prog.status : 'locked';
                         let stars = prog ? prog.stars : 0;
 
@@ -96,7 +97,7 @@ export const MissionMap = () => {
 
     const handlePlayLevel = (levelId?: string) => {
         if (levelId) {
-            navigate(`/play/maze?levelId=${levelId}`);
+            navigate(`/dashboard/play/maze?levelId=${levelId}`);
         }
     };
 

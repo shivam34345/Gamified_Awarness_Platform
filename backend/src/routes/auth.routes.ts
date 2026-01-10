@@ -1,13 +1,22 @@
-import express from 'express';
-import { register, login, verifyToken, getMe } from '../controllers/auth.controller.js';
-
+import express, { Router } from 'express';
+import { AuthController } from '../controllers/auth.controller.js';
 import { auth } from '../middleware/auth.js';
 
-const router: express.Router = express.Router();
+export class AuthRouter {
+  public router: Router;
+  private authController: AuthController;
 
-router.post('/register', register);
-router.post('/login', login);
-router.get('/verify', auth, verifyToken);
-router.get('/me', auth, getMe);
+  constructor() {
+    this.router = express.Router();
+    this.authController = new AuthController();
+    this.initializeRoutes();
+  }
 
-export default router;
+  private initializeRoutes() {
+    this.router.post('/register', this.authController.register.bind(this.authController));
+    this.router.post('/login', this.authController.login.bind(this.authController));
+    this.router.get('/verify', auth, this.authController.verifyToken.bind(this.authController));
+    this.router.get('/me', auth, this.authController.getMe.bind(this.authController));
+    this.router.get('/logout', auth, this.authController.logout.bind(this.authController));
+  }
+}

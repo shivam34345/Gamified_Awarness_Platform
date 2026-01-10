@@ -9,10 +9,6 @@ interface StoryGameProps {
 }
 
 export const StoryGame = ({ data, onComplete }: StoryGameProps) => {
-    // Story game: "Short comic / Choices affect outcome"
-    // Data: { q: "Riya scared walking home", a: "Call trusted adult" }
-
-    // We can present this as a narrative card.
 
     return (
         <div className="flex flex-col h-full max-w-2xl mx-auto pt-10">

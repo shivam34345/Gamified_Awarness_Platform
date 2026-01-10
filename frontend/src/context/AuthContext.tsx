@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-
-import api from '../lib/api';
+import { authApi } from '../lib/api';
 
 interface User {
     _id: string; // Added _id
@@ -19,6 +18,7 @@ interface User {
     badges: string[];
     streak: { count: number; lastLogin: string };
     dailyQuests?: any[]; // Added dailyQuests
+    currency? : number;
 }
 
 interface AuthContextType {
@@ -40,8 +40,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const checkAuth = async () => {
             try {
                     // Verify token with backend
-                    const res = await api.get('/auth/verify');
-                    setUser(res.data.user);
+                    const res = await authApi.verifyToken();
+                    const { user } = res.data;
+                    setUser(user);
                 } catch (error) {
                     // If verification fails, clear auth
                     console.error("Token verification failed", error);
@@ -54,9 +55,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = async (email: string, password: string) => {
         try {
-            const res = await api.post('/auth/login', { email, password });
+            const res = await authApi.login(email, password);
             const { user } = res.data;
-            localStorage.setItem('edu_user', user);
+            localStorage.setItem('edu_user', JSON.stringify(user));
             setUser(user);
             toast.success(`Welcome back, ${user.username}!`);
             navigate('/dashboard');
@@ -77,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 avatarId: String(data.avatarId)
             };
 
-            const res = await api.post('/auth/register', payload);
+            const res = await authApi.register(payload);
             const { user } = res.data;
 
             localStorage.setItem('edu_user', JSON.stringify(user));
@@ -92,10 +93,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('edu_user');
-        navigate('/');
+    const logout = async () => {
+        try {
+            await authApi.logout();
+            setUser(null);
+            localStorage.removeItem('edu_user');
+            toast.success('You have been logged out successfully!');
+            navigate('/');
+        } catch (error) {
+            console.error("Logout failed", error);
+            toast.error('Logout failed. Please try again.');
+        }
     };
 
     const updateUser = (userData: Partial<User>) => {

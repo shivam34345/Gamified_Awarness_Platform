@@ -6,24 +6,25 @@ import { useAuth } from "@/context/AuthContext";
 import { GameCard } from "@/components/ui/GameCard";
 import { gameApi } from "@/lib/api";
 import { getAvatarSeed } from "@/utils/avatarUtils";
+import { useSearchParams } from "react-router-dom";
 
 const LeaderboardPage = () => {
     const { user } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const returnPath = searchParams.get('return') || '/';
 
     useEffect(() => {
         const fetchLeaderboard = async () => {
             try {
                 const res = await gameApi.getLeaderboard();
-                // Map API data to UI format if needed, but backend seems to match well
-                // Backend returns: _id, username, totalStars, xp, avatarId
-                // UI expects: rank, name, xp, avatar, badges
                 const mapped = res.data.map((player: any, index: number) => ({
                     rank: index + 1,
                     name: player.username,
                     xp: player.xp || 0,
-                    avatar: player.avatarId, // We will use getAvatarSeed in UI
+                    avatar: player.avatarId,
                     badges: player.badges?.length || 0,
                     isUser: player._id === user?._id
                 }));

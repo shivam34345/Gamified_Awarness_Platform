@@ -1,44 +1,92 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ChevronRight, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { GameCard } from "@/components/ui/GameCard";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { gameApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
-// ... imports
-
-interface Topic {
+interface TopicProgress {
     id: string;
     name: string; // or title
     progress: number;
     color: string;
-    title?: string; // Handle both
 }
 
-interface TopicProgressListProps {
-    topics?: Topic[];
-}
+export const TopicProgressList = () => {
+    const { user } = useAuth();
+    const [topics, setTopics] = useState<TopicProgress[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [end, setEnd] = useState<number>(4);
 
-export const TopicProgressList = ({ topics = [] }: TopicProgressListProps) => {
-    const [end , setEnd] = useState<number>(4);
+    useEffect(() => {
+        const fetchTopics = async () => {
+            if (!user || !user.progress) {
+                setLoading(false); // If no user or progress, stop loading and show empty state
+                return;
+            }
+            try {
+                const res = await gameApi.getMapData();
+                const mapData = res.data;
+
+                const calculatedProgress = mapData.map((region: any) => {
+                    const totalLevels = region.levels.length;
+                    const completedInRegion = user.progress.filter((p: any) =>
+                        p.status === 'completed' &&
+                        region.levels.some((l: any) => String(l.levelId) === String(p.levelId) || String(l._id) === String(p.levelId))
+                    ).length;
+
+                    return {
+                        id: region.regionId,
+                        name: region.title,
+                        progress: Math.round((completedInRegion / (totalLevels || 1)) * 100),
+                        color: region.themeColor || 'blue'
+                    };
+                });
+
+                setTopics(calculatedProgress);
+            } catch (error) {
+                console.error("Failed to fetch topic progress", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTopics();
+    }, [user]);
+
+    if (loading) {
+        return (
+            <GameCard glow="none">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-display font-bold text-dark flex items-center gap-2">
+                        <BookOpen size={20} className="text-primary" />
+                        Topic Mastery
+                    </h3>
+                </div>
+                <div className="text-center py-4 text-gray-400 font-nunito">
+                    Loading...
+                </div>
+            </GameCard>
+        );
+    }
+
     return (
         <GameCard glow="none">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-display font-bold text-dark">Your Journey</h3>
-                <Link to="/play" className="text-primary font-nunito font-bold text-sm flex items-center gap-1 hover:underline">
-                    Start Playing <ChevronRight size={16} />
-                </Link>
+                <h3 className="text-xl font-display font-bold text-dark flex items-center gap-2">
+                    <BookOpen size={20} className="text-primary" />
+                    Topic Mastery
+                </h3>
+                {topics.length > 4 && (
+                    <button onClick={() => setEnd(end === 4 ? topics.length : 4)} className="text-primary font-bold text-sm hover:underline">
+                        {end === 4 ? "View All" : "Show Less"}
+                    </button>
+                )}
             </div>
 
             <div className="space-y-4">
-                {topics.slice(0,end).map((topic, index) => {
-                    const displayTitle = topic.title || topic.name;
-                    // Ensure color is a valid class string or handle defaults
-                    const colorClass = topic.color === 'blue' ? 'from-blue-400 to-blue-600' :
-                        topic.color === 'green' ? 'from-green-400 to-green-600' :
-                            topic.color === 'orange' ? 'from-orange-400 to-orange-600' :
-                                'from-purple-400 to-purple-600'; // Default fallback
-
+                {topics.slice(0, end).map((topic, index) => {
                     return (
                         <motion.div
                             key={topic.id}
@@ -48,28 +96,21 @@ export const TopicProgressList = ({ topics = [] }: TopicProgressListProps) => {
                             className="group cursor-pointer"
                         >
                             <div className="flex items-center gap-4 p-2 rounded-xl hover:bg-gray-50 transition-colors">
-                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
-                                    <BookOpen size={24} className="text-white" />
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
+                                    <BookOpen size={24} className="text-white w-full h-full rounded-xl p-2" style={{ backgroundColor: topic.color }} />
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex justify-between mb-1">
-                                        <span className="font-nunito font-bold text-dark">{displayTitle}</span>
-                                        {displayTitle !== "Knowledge Hub" && (
-                                            <span className="font-nunito font-bold text-primary">{topic.progress}%</span>
-                                        )}
+                                        <span className="font-nunito font-bold text-dark">{topic.name}</span>
+                                        <span className="font-nunito font-bold text-primary">{topic.progress}%</span>
                                     </div>
-                                    {displayTitle !== "Knowledge Hub" && (
-                                        <ProgressBar
-                                            current={topic.progress}
-                                            max={100}
-                                            showLabel={false}
-                                            variant={topic.progress === 100 ? "accent" : "primary"}
-                                            size="sm"
-                                        />
-                                    )}
-                                    {displayTitle === "Knowledge Hub" && (
-                                        <p className="text-xs text-gray-500 font-nunito">Explore articles & documents</p>
-                                    )}
+                                    <ProgressBar
+                                        current={topic.progress}
+                                        max={100}
+                                        showLabel={false}
+                                        variant={topic.progress === 100 ? "accent" : "primary"}
+                                        size="sm"
+                                    />
                                 </div>
                             </div>
                         </motion.div>
@@ -77,18 +118,10 @@ export const TopicProgressList = ({ topics = [] }: TopicProgressListProps) => {
                 })}
                 {topics.length === 0 && (
                     <div className="text-center text-gray-400 font-nunito text-sm py-4">
-                        Start playing to see progress!
+                        No topics found
                     </div>
                 )}
             </div>
-            {end < topics.length && <div className="flex items-center justify-center mt-4">
-                <button
-                    onClick={() => setEnd(end + 4)}
-                    className="px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary/80 transition-colors"
-                >
-                    Show More
-                </button>
-            </div>}
         </GameCard>
     );
 };

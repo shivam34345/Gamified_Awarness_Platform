@@ -39,7 +39,7 @@ export const HeroSection = ({
                     transition={{ duration: 3, repeat: Infinity }}
                     whileHover={{ scale: 1.05 }}
                 >
-                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center shadow-xl shadow-primary/30 p-1">
+                    <div className="w-32 h-32 rounded-full bg-linear-to-br from-primary via-secondary to-accent flex items-center justify-center shadow-xl shadow-primary/30 p-1">
                         <div className="w-full h-full bg-white rounded-full overflow-hidden relative">
                             <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${getAvatarSeed(avatarId)}`} alt="Avatar" className="w-full h-full object-cover" />
                         </div>
@@ -73,7 +73,7 @@ export const HeroSection = ({
                             </div>
                             <ProgressBar current={currentXP} max={nextLevelXP} showLabel={false} size="lg" />
                         </div>
-                        <Link to="/play" className="hidden md:block flex-shrink-0">
+                        <Link to="/dashboard/play?return=/dashboard" className="hidden md:block flex-shrink-0">
                             <GameButton variant="primary" size="md">
                                 <Play size={20} className="fill-current" />
                                 Continue

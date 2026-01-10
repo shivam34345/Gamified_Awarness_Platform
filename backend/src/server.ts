@@ -2,8 +2,10 @@ import express, { type Request, type Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
-import authRoutes from './routes/auth.routes.js';
-import gameRoutes from './routes/game.routes.js';
+import {AuthRouter} from './routes/auth.routes.js';
+import {GameRouter} from './routes/game.routes.js';
+import {SocialRouter} from './routes/social.routes.js';
+import {DuelRouter} from './routes/duel.routes.js';
 import { initDailyQuestsJob } from './jobs/dailyQuests.job.js';
 import cookieParser from "cookie-parser";
 dotenv.config();
@@ -12,42 +14,54 @@ dotenv.config();
 initDailyQuestsJob();
 // Run once on startup to ensure quests exist during dev
 
-async function startServer() {
-    try {
+export class App{
+    private app : express.Application;
+    private authRouter : AuthRouter;
+    private gameRouter : GameRouter;
+    private socialRouter : SocialRouter;
+    private duelRouter : DuelRouter;
+    constructor(){
+        this.app = express();
+        this.authRouter = new AuthRouter();
+        this.gameRouter = new GameRouter();
+        this.socialRouter = new SocialRouter();
+        this.duelRouter = new DuelRouter();
+    }
+    private async initializeRoutes(){
+        this.app.use('/api/auth', this.authRouter.router);
+        this.app.use('/api/game', this.gameRouter.router);
+        this.app.use('/api/social', this.socialRouter.router);
+        this.app.use('/api/duels', this.duelRouter.router);
         await connectDB();
-
-        const app = express();
+    }
+    public async startServer(){
         const PORT = process.env.PORT || 5000;
-
+        
         // Middleware
-        app.use(cors({
+        this.app.use(cors({
             origin: ['http://localhost:5173', 'http://localhost:3000'],
             credentials: true
         }));
-        app.use(express.json());
-        app.use(cookieParser());
-
-        // Routes
-        app.use('/api/auth', authRoutes);
-        app.use('/api/game', gameRoutes);
-
-
-        app.get('/', (req: Request, res: Response) => {
+        
+        this.app.use(express.json());
+        this.app.use(cookieParser());
+        this.initializeRoutes();
+        
+        this.app.get('/', (req: Request, res: Response) => {
             res.json({ message: 'Welcome to EduRights API 🚀' });
         });
 
-        app.get('/health', (req: Request, res: Response) => {
+        this.app.get('/health', (req: Request, res: Response) => {
             res.json({ status: 'OK', timestamp: new Date() });
         });
 
         // Start Server
-        app.listen(PORT, () => {
+        this.app.listen(PORT, () => {
             console.log(`🚀 Server running on http://localhost:${PORT}`);
         });
-    } catch (error) {
-        console.log(error);
     }
-
 }
 
-startServer();
+const app = new App();
+await app.startServer.bind(app)();
+
