@@ -19,28 +19,6 @@ export default [
                         lawId: "law_rti",
                         title: "Meet Your Guide Character",
                         xp: 5,
-                        videoScript: {
-                            title: "Introduction to RTI",
-                            duration: 60,
-                            voiceOver: "Indian English - Female",
-                            content: [
-                                { timing: "0-5s", visual: "Animated girl (age 12) with question mark above head", script: "Hi! I'm Priya. Have you ever wondered... why does the government do what it does?" },
-                                { timing: "5-15s", visual: "Scenes of government buildings, people voting, schools", script: "Like, why does MY school's lunch menu change? Or where does the city's money go? Well, there's a LAW for that." },
-                                { timing: "15-25s", visual: "Animated document flying onto screen with glowing effect", script: "It's called the RIGHT TO INFORMATION - or RTI. And guess what? YOU can use it. Even at your age!" },
-                                { timing: "25-40s", visual: "Priya pointing at 3 animated steps: Write → Send → Wait → Get Answer", script: "Here's how it works: You write a question, send it to the government, wait 30 days, and they MUST tell you!" },
-                                { timing: "40-55s", visual: "Priya winking, animated badge appearing", script: "In this quest, you'll become an RTI expert just like me. You'll learn how to ask BIG questions about your city." },
-                                { timing: "55-60s", visual: "Animated RTI badge, Priya smiling", script: "Ready to be a change-maker? Let's go!" }
-                            ]
-                        },
-                        videoGeneration: {
-                            tool: "Krikey AI",
-                            character: "Priya (age 12, brown skin, Indian features, friendly)",
-                            background: "Bright classroom with posters",
-                            music: "Upbeat educational soundtrack",
-                            subtitles: true,
-                            textSize: "large",
-                            colorScheme: "#3b82f6"
-                        },
                         challenge: {
                             instruction: "Watch Priya's story about RTI. Then answer: What is RTI used for?",
                             options: [
@@ -52,7 +30,14 @@ export default [
                         reward: {
                             unlocks: "Priya as your guide character",
                             badge: "RTI Listener"
-                        }
+                        },
+                        description: "Learn the basics of RTI from Priya.",
+                        video: "https://www.youtube.com/embed/dQw4w9WgXcQ", // Placeholder video
+                        references: [
+                            { title: "RTI Act Official PDF", url: "https://rti.gov.in/rti-act.pdf" },
+                            { title: "Guide for Students", url: "https://example.com/rti-student-guide" }
+                        ],
+                        sticker: "https://cdn-icons-png.flaticon.com/512/942/942751.png" // Star Sticker URL
                     },
                     {
                         type: "drag_and_match",
@@ -80,7 +65,10 @@ export default [
                             realWorldExample: "Priya wanted to know why her school's lunch supplier changed. She followed these exact steps and GOT the answer in 28 days!",
                             keyTakeaway: "The process is SIMPLE - anyone can do it!"
                         },
-                        reward: { badge: "RTI Process Master", unlocksNextChallenge: true }
+                        reward: { badge: "RTI Process Master", unlocksNextChallenge: true },
+                        description: "Arrange the steps to file an RTI correctly.",
+                        params: { showHint: true }, // Extra data
+                        sticker: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" // Process Icon
                     },
                     {
                         type: "scenario_choice",
@@ -277,6 +265,69 @@ export default [
                         }
                     }
                 ]
+            },
+            {
+                title: "Information Power",
+                x: 70, y: 15,
+                challenges: [
+                    {
+                        type: "true_false_quiz",
+                        gameType: "tap",
+                        title: "Power of Info",
+                        order: 1,
+                        xp: 10,
+                        questions: [
+                            { id: "q1", question: "Information is power?", correctAnswer: true, xp: 10 }
+                        ]
+                    }
+                ]
+            },
+            {
+                title: "Rights Tracker",
+                x: 30, y: 30,
+                challenges: [
+                    {
+                        type: "drag_and_match",
+                        gameType: "drag",
+                        title: "Track Your Rights",
+                        order: 1,
+                        xp: 10,
+                        items: [
+                            { id: "1", label: "Ask", correctPosition: 1 },
+                            { id: "2", label: "Get", correctPosition: 2 }
+                        ]
+                    }
+                ]
+            },
+            {
+                title: "Truth Seeker",
+                x: 60, y: 50,
+                challenges: [
+                    {
+                        type: "scenario_choice",
+                        gameType: "situation",
+                        title: "Seek the Truth",
+                        order: 1,
+                        xp: 10,
+                        scenario: { question: "Is hiding info good?", choices: [{ id: "c1", answer: "No", isCorrect: true }] }
+                    }
+                ]
+            },
+            {
+                title: "Transparency Hero",
+                x: 40, y: 70,
+                challenges: [
+                    {
+                        type: "true_false_quiz",
+                        gameType: "tap",
+                        title: "Be a Hero",
+                        order: 1,
+                        xp: 10,
+                        questions: [
+                            { id: "q1", question: "Transparency helps everyone?", correctAnswer: true, xp: 10 }
+                        ]
+                    }
+                ]
             }
         ]
     },
@@ -288,7 +339,11 @@ export default [
         bgGradient: "from-emerald-50/50 to-emerald-100/30",
         order: 2,
         levels: [
-            { title: "Water Crisis", x: 45, y: 10, games: {} }
+            { title: "Water Crisis", x: 45, y: 10, games: {} },
+            { title: "Food Security", x: 30, y: 30, games: {} },
+            { title: "Safe Shelter", x: 60, y: 30, games: {} },
+            { title: "Clean Air", x: 20, y: 50, games: {} },
+            { title: "Health Basics", x: 70, y: 50, games: {} }
         ]
     },
     {
@@ -299,7 +354,11 @@ export default [
         bgGradient: "from-amber-50/50 to-amber-100/30",
         order: 3,
         levels: [
-            { title: "Voice Up", x: 70, y: 10, games: {} }
+            { title: "Voice Up", x: 70, y: 10, games: {} },
+            { title: "Listen First", x: 50, y: 30, games: {} },
+            { title: "Respect Opinions", x: 30, y: 50, games: {} },
+            { title: "Free Press", x: 80, y: 40, games: {} },
+            { title: "Artistic Expression", x: 40, y: 70, games: {} }
         ]
     },
     {
@@ -310,7 +369,11 @@ export default [
         bgGradient: "from-sky-50/50 to-sky-100/30",
         order: 4,
         levels: [
-            { title: "Who Am I?", x: 20, y: 10, games: {} }
+            { title: "Who Am I?", x: 20, y: 10, games: {} },
+            { title: "My Name", x: 40, y: 20, games: {} },
+            { title: "My Culture", x: 60, y: 30, games: {} },
+            { title: "Nationality", x: 30, y: 40, games: {} },
+            { title: "Unique You", x: 50, y: 50, games: {} }
         ]
     },
     {
@@ -321,7 +384,11 @@ export default [
         bgGradient: "from-green-50/50 to-green-100/30",
         order: 5,
         levels: [
-            { title: "Family Tree", x: 70, y: 10, games: {} }
+            { title: "Family Tree", x: 70, y: 10, games: {} },
+            { title: "Helping Hands", x: 50, y: 25, games: {} },
+            { title: "Safe Home", x: 30, y: 40, games: {} },
+            { title: "Family Rules", x: 60, y: 55, games: {} },
+            { title: "Love & Care", x: 40, y: 70, games: {} }
         ]
     },
     {
@@ -332,7 +399,11 @@ export default [
         bgGradient: "from-red-50/50 to-red-100/30",
         order: 6,
         levels: [
-            { title: "Checkup", x: 40, y: 10, games: {} }
+            { title: "Checkup", x: 40, y: 10, games: {} },
+            { title: "Healthy Food", x: 60, y: 20, games: {} },
+            { title: "Exercise Daily", x: 20, y: 35, games: {} },
+            { title: "Mental Health", x: 50, y: 50, games: {} },
+            { title: "Hygiene Hero", x: 30, y: 65, games: {} }
         ]
     },
     {
@@ -343,7 +414,11 @@ export default [
         bgGradient: "from-yellow-50/50 to-yellow-100/30",
         order: 7,
         levels: [
-            { title: "School Day", x: 30, y: 10, games: {} }
+            { title: "School Day", x: 30, y: 10, games: {} },
+            { title: "Library Quest", x: 50, y: 25, games: {} },
+            { title: "Science Fair", x: 70, y: 40, games: {} },
+            { title: "Art Class", x: 40, y: 55, games: {} },
+            { title: "Sports Day", x: 60, y: 70, games: {} }
         ]
     },
     {
@@ -354,7 +429,11 @@ export default [
         bgGradient: "from-purple-50/50 to-purple-100/30",
         order: 8,
         levels: [
-            { title: "Fair Play", x: 50, y: 10, games: {} }
+            { title: "Fair Play", x: 50, y: 10, games: {} },
+            { title: "Girls & Boys", x: 30, y: 25, games: {} },
+            { title: "No Bullying", x: 70, y: 25, games: {} },
+            { title: "Respect All", x: 40, y: 45, games: {} },
+            { title: "Teamwork", x: 60, y: 60, games: {} }
         ]
     },
     {
@@ -365,7 +444,11 @@ export default [
         bgGradient: "from-indigo-50/50 to-indigo-100/30",
         order: 9,
         levels: [
-            { title: "My Diary", x: 75, y: 10, games: {} }
+            { title: "My Diary", x: 75, y: 10, games: {} },
+            { title: "Safe Secrets", x: 55, y: 25, games: {} },
+            { title: "Digital Privacy", x: 35, y: 40, games: {} },
+            { title: "Personal Space", x: 65, y: 55, games: {} },
+            { title: "Trust Check", x: 45, y: 70, games: {} }
         ]
     },
     {
@@ -401,7 +484,11 @@ export default [
                         { q: "Tap danger actions", a: ["Block stranger", "Go to crowd"], xp: 25 }
                     ]
                 }
-            }
+            },
+            { title: "Emergency Call", x: 50, y: 30, games: {} },
+            { title: "Safe Touch", x: 70, y: 30, games: {} },
+            { title: "Online Safety", x: 40, y: 50, games: {} },
+            { title: "Trusted Adults", x: 60, y: 70, games: {} }
         ]
     },
     {
@@ -437,7 +524,11 @@ export default [
                         { q: "Tap relax", a: ["Walk", "Drink water"], xp: 25 }
                     ]
                 }
-            }
+            },
+            { title: "Conflict Check", x: 40, y: 30, games: {} },
+            { title: "Kind Words", x: 70, y: 30, games: {} },
+            { title: "Forgiveness", x: 50, y: 50, games: {} },
+            { title: "Friendship", x: 30, y: 70, games: {} }
         ]
     },
     {
@@ -473,7 +564,11 @@ export default [
                         { q: "Tap right", a: ["Wait turn"], xp: 25 }
                     ]
                 }
-            }
+            },
+            { title: "Court Room", x: 60, y: 30, games: {} },
+            { title: "Fair Judge", x: 30, y: 40, games: {} },
+            { title: "Legal Rights", x: 70, y: 50, games: {} },
+            { title: "Constitution", x: 45, y: 65, games: {} }
         ]
     },
     {
@@ -509,7 +604,11 @@ export default [
                         { q: "Tap hope", a: ["Practice"], xp: 25 }
                     ]
                 }
-            }
+            },
+            { title: "Future City", x: 45, y: 25, games: {} },
+            { title: "Innovation", x: 65, y: 40, games: {} },
+            { title: "Leader Steps", x: 35, y: 55, games: {} },
+            { title: "Change Maker", x: 55, y: 70, games: {} }
         ]
     }
 ];

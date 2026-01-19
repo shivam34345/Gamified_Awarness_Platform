@@ -5,6 +5,11 @@ export interface IChallenge extends Document {
     levelId: mongoose.Types.ObjectId;
     data: any;
     xp: number;
+    title: string;
+    description: string;
+    video?: string;
+    references?: { title: string; url: string }[];
+    sticker?: string;
 }
 
 const ChallengeSchema: Schema = new Schema({
@@ -16,7 +21,12 @@ const ChallengeSchema: Schema = new Schema({
     badge: { type: String }, // Optional badge award
     order: { type: Number, default: 0 },
     data: { type: Schema.Types.Mixed, required: true },
-    xp: { type: Number, required: true, default: 10 }
+    xp: { type: Number, required: true, default: 10 },
+    title: { type: String, required: true },
+    description: { type: String },
+    video: { type: String }, // URL
+    references: [{ title: String, url: String }],
+    sticker: { type: String } // URL or asset path
 }, {
     timestamps: true
 });

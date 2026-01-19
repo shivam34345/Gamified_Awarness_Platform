@@ -1,6 +1,8 @@
 import express, { type Request, type Response } from 'express';
 import cors from 'cors';
-import {config} from 'dotenv';
+import { config } from 'dotenv';
+import cookieParser from "cookie-parser";
+
 import connectDB from './config/db.js';
 import { AuthRouter } from './routes/auth.routes.js';
 import { GameRouter } from './routes/game.routes.js';
@@ -8,7 +10,6 @@ import { SocialRouter } from './routes/social.routes.js';
 import { DuelRouter } from './routes/duel.routes.js';
 import { UserRouter } from './routes/user.routes.js';
 import { initDailyQuestsJob } from './jobs/dailyQuests.job.js';
-import cookieParser from "cookie-parser";
 config();
 
 // Initialize Cron Jobs
@@ -31,12 +32,12 @@ export class App {
         this.userRouter = new UserRouter();
     }
     private async initializeRoutes() {
+        await connectDB();
         this.app.use('/api/auth', this.authRouter.router);
         this.app.use('/api/game', this.gameRouter.router);
         this.app.use('/api/social', this.socialRouter.router);
         this.app.use('/api/duels', this.duelRouter.router);
         this.app.use('/api/user', this.userRouter.router);
-        await connectDB();
     }
     public async startServer() {
         const PORT = process.env.PORT || 5000;

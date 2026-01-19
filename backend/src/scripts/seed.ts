@@ -66,11 +66,7 @@ const seed = async () => {
 
                 if (challengesData && Array.isArray(challengesData)) {
                     for (const cData of challengesData) {
-                        // Extract specific top-level fields, keep rest in 'data'
-                        // Note: We need to ensure 'data' in schema contains the specific game content.
-                        // The user's JSON flattens it. We can store the *entire* cData as data, or separate it.
-                        // Storing entire object in 'data' is safer for now alongside specific fields.
-                        const { type, gameType, lawId, difficulty, badge, order, xp } = cData;
+                        const { type, gameType, lawId, difficulty, badge, order, xp, title, description, video, references, sticker } = cData;
 
                         const challenge = new Challenge({
                             type: type,
@@ -81,6 +77,11 @@ const seed = async () => {
                             badge,
                             order,
                             xp: xp || 10,
+                            title: title || "Challenge", // Default title if missing
+                            description,
+                            video,
+                            references,
+                            sticker,
                             data: cData // Store full object in mixed field for flexibility
                         });
                         await challenge.save();
@@ -97,7 +98,12 @@ const seed = async () => {
                                         gameType: gameType, // Fallback
                                         levelId: level._id,
                                         data: challengeItem,
-                                        xp: challengeItem.xp || 10
+                                        xp: challengeItem.xp || 10,
+                                        title: challengeItem.title || challengeItem.q || "Challenge", // Fallback to question or default
+                                        description: challengeItem.description,
+                                        video: challengeItem.video,
+                                        references: challengeItem.references,
+                                        sticker: challengeItem.sticker
                                     });
                                     await challenge.save();
                                 }
