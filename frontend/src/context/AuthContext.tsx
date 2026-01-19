@@ -3,30 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authApi } from '../lib/api';
 
-interface User {
-    _id: string; // Added _id
-    id: string;
-    username: string;
-    email: string;
-    avatarId: string;
-    totalStars: number;
-    currentRegion?: string;
-    progress: { levelId: string; status: string; stars: number }[];
-    xp: number;
-    level?: number; // Added level
-    accuracy: number;
-    badges: string[];
-    streak: { count: number; lastLogin: string };
-    dailyQuests?: any[]; // Added dailyQuests
-    currency?: number;
-    // New profile fields
-    location?: string;
-    bio?: string;
-    aboutMe?: string;
-    achievements?: { title: string; date: string; description: string }[];
-    topSkills?: string[];
-    volunteeringExperience?: { role: string; organization: string; startDate: string; endDate?: string; description: string }[];
-}
+import type { User } from '../types/user';
 
 interface AuthContextType {
     user: User | null;

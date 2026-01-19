@@ -20,19 +20,24 @@ export const MazeGame = ({ levelId }: MazeGameProps) => {
                 try {
                     const res = await gameApi.getLevel(levelId);
                     const data = res.data;
-                    console.log(data);
+                    console.log("DEBUG: fetched level data:", data);
+                    console.log("DEBUG: challenges found:", data.challenges?.length);
                     setLevelData(data);
 
                     // Generate maze AFTER knowing if we have games
-                    const hasGames = data.games && Object.keys(data.games).length > 0;
+                    const hasGames = data.challenges && data.challenges.length > 0; // Use challenges array!
 
-                    generateNewMaze({
+                    const config = {
                         width: 20,
                         height: 20,
                         seed: Date.now(),
-                        difficulty: 'EASY',
-                        puzzleDensity: hasGames ? 0.1 : 0
-                    }, levelId, data.challenges);
+                        difficulty: 'EASY' as 'EASY',
+                        puzzleDensity: hasGames ? 0.3 : 0, // Increased density
+                        totalPuzzles: data.challenges ? data.challenges.length : 10
+                    } as any; // Cast to any to avoid strict type checks temporarily for totalPuzzles if interface isn't picked up yet, or just fixed config.
+                    console.log("DEBUG: generating maze with config:", config);
+
+                    generateNewMaze(config, levelId, data.challenges);
 
                 } catch (e) {
                     console.error("Failed to load level data", e);

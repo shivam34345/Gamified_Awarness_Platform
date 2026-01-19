@@ -30,6 +30,7 @@ export interface MazeConfig {
     seed: number; // For deterministic generation
     difficulty: PathDifficulty; // Overall level difficulty
     puzzleDensity: number; // 0 to 1, probability of a cell having a puzzle
+    totalPuzzles?: number; // Exact number of puzzles to generate
 }
 
 export interface Maze {

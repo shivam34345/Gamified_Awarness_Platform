@@ -9,16 +9,12 @@ import { Shield, ArrowLeft, LogIn, Lock, Mail, AlertCircle } from 'lucide-react'
 import { GameButton } from '../components/ui/GameButton';
 import { useAuth } from '../context/AuthContext';
 
-// Schema for form validation
-const loginSchema = z.object({
-    email: z.string().email('Please enter a valid email address'),
-    password: z.string().regex(/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/, 'Password must contain at least 8 characters, including one uppercase letter, one digit, and one special character'),
-});
+import { loginSchema } from '../schema/auth.schema';
 
 type LoginFormInputs = z.infer<typeof loginSchema>;
 
 const LoginPage = () => {
-    const [searchParams, ] = useSearchParams();
+    const [searchParams,] = useSearchParams();
     const { login, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [loginError, setLoginError] = useState<string | null>(null);

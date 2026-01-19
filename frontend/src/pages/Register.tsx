@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z} from "zod";
-import registerSchema from "../schema/register.schema"
+import { z } from "zod";
+import { registerSchema } from "../schema/auth.schema";
 
 import AvatarSelector from '../components/ui/AvatarSelector';
 import { ArrowRight, Lock, User, Sparkles, RefreshCw, AlertCircle, ArrowLeft } from 'lucide-react';

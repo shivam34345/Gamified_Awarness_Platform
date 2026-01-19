@@ -59,17 +59,17 @@ export class MazeGenerator {
 
         const startX = 0;
         const startY = 0;
-        
+
         // 1. Generate the Maze Structure
         const startCell = this.grid[startY][startX];
         startCell.isVisited = true;
-        
+
         // Start carving
         this.carvePassagesFrom(startX, startY);
 
         // 2. Define Start and Exit
         startCell.type = 'start';
-        
+
         const exitX = width - 1;
         const exitY = height - 1;
         this.grid[exitY][exitX].type = 'exit';
@@ -98,7 +98,7 @@ export class MazeGenerator {
         // continuing in the same direction. This creates long straight corridors 
         // which are easier to visually track than "zigzag" mazes.
         if (lastDirection && this.rng.next() > 0.35) {
-             // 65% chance to keep going straight if possible
+            // 65% chance to keep going straight if possible
             directions = this.shuffleWithout(directions, lastDirection);
             directions.unshift(lastDirection);
         } else {
@@ -123,9 +123,9 @@ export class MazeGenerator {
     // Adds loops to make the maze easier to navigate (fewer punishing dead ends)
     private addComplexity() {
         const { width, height } = this.config;
-        
+
         // Slightly higher loop chance for easier navigation
-        const loopChance = 0.05; 
+        const loopChance = 0.05;
 
         const extraPaths = Math.max(1, Math.floor((width * height) * loopChance));
 
@@ -162,7 +162,7 @@ export class MazeGenerator {
                 if (!this.grid[y][x].walls[dir]) {
                     const [nx, ny] = this.getNeighborCoords(x, y, dir);
                     const key = `${nx},${ny}`;
-                    
+
                     if (this.isValid(nx, ny) && !visited.has(key)) {
                         visited.add(key);
                         distances.set(key, dist + 1);
@@ -178,7 +178,7 @@ export class MazeGenerator {
 
         // 1. Calculate true walking distance to every cell
         const distanceMap = this.calculateDistances(startX, startY);
-        
+
         // Find the maximum distance in the maze to normalize logic
         let maxDist = 0;
         for (const dist of distanceMap.values()) maxDist = Math.max(maxDist, dist);
@@ -194,20 +194,18 @@ export class MazeGenerator {
         this.grid.flat().forEach(cell => {
             if (cell.type === 'start' || cell.type === 'exit') return;
 
-            const dist = distanceMap.get(`${cell.x},${cell.y}`) || 0;            
-            // Weight dead ends higher for selection by adding them multiple times or handling logic below
-            // Here we just categorize strictly by distance zones.
-            
-            // Easy: First 25% of the path
-            if (dist > 2 && dist < maxDist * 0.25) {
+            const dist = distanceMap.get(`${cell.x},${cell.y}`) || 0;
+
+            // Easy: First 30% of the path (expanded range)
+            if (dist > 2 && dist < maxDist * 0.30) {
                 buckets.easy.push(cell);
             }
-            // Moderate: 25% to 75% of the path
-            else if (dist >= maxDist * 0.25 && dist < maxDist * 0.75) {
+            // Moderate: 30% to 70% of the path
+            else if (dist >= maxDist * 0.30 && dist < maxDist * 0.70) {
                 buckets.moderate.push(cell);
             }
-            // Hard: Last 25% of the path
-            else if (dist >= maxDist * 0.75) {
+            // Hard: Last 30% of the path
+            else if (dist >= maxDist * 0.70) {
                 buckets.hard.push(cell);
             }
         });
@@ -217,11 +215,16 @@ export class MazeGenerator {
         buckets.moderate = this.rng.shuffle(buckets.moderate);
         buckets.hard = this.rng.shuffle(buckets.hard);
 
-        // 3. Assign IDs
+        // 3. Determine counts based on config
+        const total = this.config.totalPuzzles || 10;
+        const easyCount = Math.floor(total * 0.4);
+        const moderateCount = Math.floor(total * 0.4);
+        const hardCount = total - easyCount - moderateCount;
+
+        // 4. Assign IDs
         // We prioritize dead ends within the buckets if possible, otherwise take any cell
         const assign = (bucket: MazeCell[], count: number, prefix: string) => {
             // Sort bucket so Dead Ends are at the front (preferred for puzzles)
-            // This ensures hard puzzles are deep in dead ends if possible
             bucket.sort((a, b) => {
                 const aWalls = Object.values(a.walls).filter(w => w).length;
                 const bWalls = Object.values(b.walls).filter(w => w).length;
@@ -235,9 +238,9 @@ export class MazeGenerator {
             }
         };
 
-        assign(buckets.easy, 4, 'easy');
-        assign(buckets.moderate, 4, 'moderate');
-        assign(buckets.hard, 2, 'hard');
+        assign(buckets.easy, easyCount, 'easy');
+        assign(buckets.moderate, moderateCount, 'moderate');
+        assign(buckets.hard, hardCount, 'hard');
     }
 
     private shuffleWithout<T>(array: T[], exclude: T): T[] {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 // Import Game Components (will be created next)
@@ -14,6 +14,8 @@ import { TimeChallengeGame } from './TimeChallengeGame';
 import { QuizGame } from './QuizGame';
 import { ReflectionGame } from './ReflectionGame';
 
+import { type Challenge } from "..//../../types/challenge"
+
 interface ChallengeGameProps {
     level: any;
     onClose: () => void;
@@ -22,7 +24,7 @@ interface ChallengeGameProps {
 }
 
 export const ChallengeGame = ({ level, onClose, mode = 'sequence', puzzleId }: ChallengeGameProps) => {
-    const [challenges, setChallenges] = useState<any[]>([]);
+    const [challenges, setChallenges] = useState<Challenge[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [score, setScore] = useState(0);
     const [gameOver, setGameOver] = useState(false);
@@ -33,7 +35,7 @@ export const ChallengeGame = ({ level, onClose, mode = 'sequence', puzzleId }: C
             // New Logic: Use level.challenges if available
             if (level.challenges && level.challenges.length > 0) {
                 if (mode === 'single' && puzzleId) {
-                    const foundChallenge = level.challenges.find((c: any) => c._id === puzzleId);
+                    const foundChallenge = level.challenges.find((c: Challenge) => c._id === puzzleId);
                     if (foundChallenge) {
                         setChallenges([foundChallenge]);
                     } else {
@@ -50,7 +52,47 @@ export const ChallengeGame = ({ level, onClose, mode = 'sequence', puzzleId }: C
             toast.error("Level not found");
             onClose();
         }
-    }, [level, mode, puzzleId]);
+    }, [level, puzzleId, mode]);
+
+    const currentChallenge = challenges[currentIndex];
+
+    const renderChallengeInfo = () => {
+        if (!currentChallenge) return null;
+        return (
+            <div className="mb-4 bg-slate-800/80 p-4 rounded-lg border border-slate-700">
+                {currentChallenge.title && <h3 className="text-xl font-bold text-cyan-400 mb-2">{currentChallenge.title}</h3>}
+                {currentChallenge.description && <p className="text-slate-300 mb-3">{currentChallenge.description}</p>}
+
+                {currentChallenge.video && (
+                    <div className="mb-4 aspect-video bg-black rounded overflow-hidden">
+                        <iframe
+                            src={currentChallenge.video}
+                            title="Challenge Video"
+                            className="w-full h-full"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    </div>
+                )}
+
+                {currentChallenge.references && currentChallenge.references.length > 0 && (
+                    <div className="mb-3">
+                        <h4 className="text-sm font-semibold text-slate-400 mb-1">References:</h4>
+                        <ul className="list-disc list-inside text-sm text-cyan-300">
+                            {currentChallenge.references.map((ref: { title: string, url: string }, idx: number) => (
+                                <li key={idx}>
+                                    <a href={ref.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                        {ref.title}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const handleChallengeComplete = async (xp: number) => {
         try {
@@ -104,8 +146,6 @@ export const ChallengeGame = ({ level, onClose, mode = 'sequence', puzzleId }: C
         );
     }
 
-    const currentChallenge = challenges[currentIndex];
-
     // Identify game component
     // Identify game component
     let GameComponent;
@@ -137,35 +177,55 @@ export const ChallengeGame = ({ level, onClose, mode = 'sequence', puzzleId }: C
     }
 
     return (
-        <div className="flex flex-col h-full w-full max-w-5xl mx-auto p-2 md:p-4">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-4 bg-white/10 p-3 rounded-2xl backdrop-blur-sm shrink-0">
-                <div className="flex items-center gap-3">
-                    <span className="text-white/60 font-bold text-sm md:text-base">Challenge {currentIndex + 1}/{challenges.length}</span>
-                    <div className="h-2 w-24 md:w-32 bg-white/20 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-yellow-400 transition-all duration-500"
-                            style={{ width: `${((currentIndex) / challenges.length) * 100}%` }}
-                        />
+        <div className="relative z-10 w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-slate-900/95 border border-cyan-500/30 rounded-2xl p-6 shadow-2xl backdrop-blur-xl flex flex-col">
+            <button
+                onClick={onClose}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors z-20"
+            >
+                ✕
+            </button>
+
+            {/* Challenge Info Header (Title, Video, Desc) */}
+            {renderChallengeInfo()}
+
+            {/* Game Status Header */}
+            <div className="flex justify-between items-center mb-6 shrink-0 border-b border-slate-700/50 pb-4">
+                <div>
+                    <h2 className="text-2xl font-bold bg-linear-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                        {type?.replace(/_/g, ' ').toUpperCase() || 'CHALLENGE'}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-1">
+                        <span className="text-slate-400 text-sm">Challenge {currentIndex + 1} of {challenges.length}</span>
+                        {/* Progress Bar */}
+                        <div className="h-1.5 w-24 bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-cyan-400 transition-all duration-300"
+                                style={{ width: `${((currentIndex + 1) / challenges.length) * 100}%` }}
+                            />
+                        </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 text-yellow-300 font-bold text-lg md:text-xl">
-                    <Star fill="currentColor" size={20} /> {score} XP
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 bg-slate-800/50 px-3 py-1 rounded-lg border border-slate-700">
+                        <Trophy className="w-5 h-5 text-yellow-400" />
+                        <span className="font-mono text-xl text-yellow-50">{score} XP</span>
+                    </div>
                 </div>
             </div>
 
-            {/* Game Area */}
+            {/* Game Interaction Area */}
             <div className="flex-1 relative min-h-0">
                 <AnimatePresence mode='wait'>
                     <motion.div
                         key={currentIndex}
-                        initial={{ opacity: 0, x: 50 }}
+                        initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -50 }}
+                        exit={{ opacity: 0, x: -20 }}
                         className="h-full"
                     >
                         <GameComponent
-                            data={currentChallenge.data || currentChallenge} // Support both new nested data and legacy flat structure
+                            data={currentChallenge.data || currentChallenge}
                             onComplete={handleChallengeComplete}
                         />
                     </motion.div>

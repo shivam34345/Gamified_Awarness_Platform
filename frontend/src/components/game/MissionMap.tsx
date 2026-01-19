@@ -7,23 +7,7 @@ import { Cloud, MapPin } from 'lucide-react';
 import { AvatarMarker } from './AvatarMarker';
 // import { AvatarMarker } from './AvatarMarker';
 
-interface LevelData {
-    _id: string; // Changed from levelId
-    levelNumber: number; // Added
-    title: string;
-    status: 'locked' | 'unlocked' | 'completed';
-    stars: number;
-    x: number;
-    y: number;
-}
-
-interface RegionData {
-    _id: string; // Changed from regionId
-    title: string;
-    levels: LevelData[];
-    themeColor: string;
-    bgGradient?: string;
-}
+import type { RegionData } from '../../types/level';
 
 export const MissionMap = () => {
     const navigate = useNavigate();
@@ -119,7 +103,7 @@ export const MissionMap = () => {
 
                 currentLevelPos = { x: l.x, y: globalY, regionIdx: rIdx };
             }
-            
+
         });
     });
 

@@ -51,14 +51,17 @@ export const MazeProvider: React.FC<{ children: React.ReactNode; onComplete?: ()
                             // Assign actual Challenge _id
                             if (challengeIndex < challenges.length) {
                                 cell.puzzleId = challenges[challengeIndex]._id;
+                                console.log(`DEBUG: Mapped puzzle slot to challenge ${cell.puzzleId}`);
                                 challengeIndex++;
                             } else {
                                 // Let's remove extras to avoid confusion/duplicates if not intended
+                                console.log("DEBUG: Removed extra puzzle slot (no challenge available)");
                                 cell.puzzleId = undefined;
                             }
                         }
                     });
                 });
+                console.log(`DEBUG: Total puzzles mapped: ${challengeIndex}`);
             } else if (levelId) {
                 // Legacy fallback: Prefix Puzzle IDs with Level ID
                 newMaze.grid.forEach(row => {

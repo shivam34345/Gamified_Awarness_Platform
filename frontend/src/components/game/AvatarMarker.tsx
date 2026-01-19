@@ -17,7 +17,7 @@ export const AvatarMarker = ({ avatarId }: AvatarMarkerProps) => {
             }}
         >
             {/* Pin Shape */}
-            <div className="relative z-10 w-16 h-16 rounded-full border-4 border-white shadow-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
+            <div className="relative z-10 w-16 h-16 rounded-full border-4 border-white shadow-lg bg-linear-to-br from-primary to-accent flex items-center justify-center overflow-hidden">
                 <img
                     src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${getAvatarSeed(avatarId)}`}
                     alt="Hero"
